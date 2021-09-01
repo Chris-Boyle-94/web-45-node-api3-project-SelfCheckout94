@@ -20,7 +20,7 @@ router.get("/", logger, async (req, res, next) => {
   }
 });
 
-router.get("/:id", logger, validateUserId, async (req, res, next) => {
+router.get("/:id", logger, validateUserId, (req, res, next) => {
   try {
     res.json(req.user);
   } catch (err) {
@@ -33,7 +33,7 @@ router.post("/", logger, validateUser, async (req, res, next) => {
     const newUser = await Users.insert(req.body);
     res.status(201).json(newUser);
   } catch (err) {
-    next;
+    next();
   }
 });
 
@@ -47,14 +47,20 @@ router.put(
       const updatedUser = await Users.update(req.params.id, req.body);
       res.status(200).json(updatedUser);
     } catch (err) {
-      next;
+      next();
     }
   }
 );
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", logger, validateUserId, async (req, res, next) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
+  try {
+    await Users.remove(req.params.id);
+    res.status(200).json(req.user);
+  } catch (error) {
+    next;
+  }
 });
 
 router.get("/:id/posts", (req, res) => {
