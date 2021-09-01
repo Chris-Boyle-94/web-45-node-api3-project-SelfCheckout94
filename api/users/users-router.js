@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { logger } = require("../middleware/middleware");
+const { logger, validateUserId } = require("../middleware/middleware");
 
 const Users = require("./users-model");
 const Posts = require("./../posts/posts-model");
@@ -16,15 +16,8 @@ router.get("/", logger, async (req, res, next) => {
   }
 });
 
-router.get("/:id", logger, async (req, res, next) => {
-  // RETURN THE USER OBJECT
-  // this needs a middleware to verify user id
-  try {
-    const user = await Users.getById(req.params.id);
-    res.status(200).json(user);
-  } catch (err) {
-    next();
-  }
+router.get("/:id", logger, validateUserId, async (req, res) => {
+  res.json(req.user);
 });
 
 router.post("/", (req, res) => {
