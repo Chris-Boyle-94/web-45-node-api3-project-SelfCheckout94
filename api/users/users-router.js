@@ -16,30 +16,41 @@ router.get("/", logger, async (req, res, next) => {
     const users = await Users.get(req.query);
     res.status(200).json(users);
   } catch (err) {
-    next();
+    next;
   }
 });
 
-router.get("/:id", logger, validateUserId, async (req, res) => {
-  res.json(req.user);
+router.get("/:id", logger, validateUserId, async (req, res, next) => {
+  try {
+    res.json(req.user);
+  } catch (err) {
+    next;
+  }
 });
 
 router.post("/", logger, validateUser, async (req, res, next) => {
-  // RETURN THE NEWLY CREATED USER OBJECT
-  // this needs a middleware to check that the request body is valid
   try {
     const newUser = await Users.insert(req.body);
     res.status(201).json(newUser);
   } catch (err) {
-    next();
+    next;
   }
 });
 
-router.put("/:id", (req, res) => {
-  // RETURN THE FRESHLY UPDATED USER OBJECT
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
-});
+router.put(
+  "/:id",
+  logger,
+  validateUserId,
+  validateUser,
+  async (req, res, next) => {
+    try {
+      const updatedUser = await Users.update(req.params.id, req.body);
+      res.status(200).json(updatedUser);
+    } catch (err) {
+      next;
+    }
+  }
+);
 
 router.delete("/:id", (req, res) => {
   // RETURN THE FRESHLY DELETED USER OBJECT

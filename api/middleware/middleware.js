@@ -32,7 +32,6 @@ const validateUserId = async (req, res, next) => {
 };
 
 const validateUser = (req, res, next) => {
-  // DO YOUR MAGIC
   const { name } = req.body;
   try {
     if (name) {
