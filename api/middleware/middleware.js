@@ -1,12 +1,20 @@
 const { getById } = require("../users/users-model");
 
 function logger(req, res, next) {
-  console.log("METHOD: ", req.method, "URL: ", req.url, "TIME: ", Date.now());
+  console.log(
+    "METHOD: ",
+    req.method,
+    "||",
+    "URL: ",
+    req.url,
+    "||",
+    "TIME: ",
+    Date.now()
+  );
   next();
 }
 
 const validateUserId = async (req, res, next) => {
-  // DO YOUR MAGIC
   try {
     const user = await getById(req.params.id);
     if (user) {
@@ -15,7 +23,7 @@ const validateUserId = async (req, res, next) => {
     } else {
       next({
         status: 404,
-        message: "User with this ID not found",
+        message: "user not found",
       });
     }
   } catch (err) {
@@ -23,9 +31,22 @@ const validateUserId = async (req, res, next) => {
   }
 };
 
-function validateUser(req, res, next) {
+const validateUser = (req, res, next) => {
   // DO YOUR MAGIC
-}
+  const { name } = req.body;
+  try {
+    if (name) {
+      next();
+    } else {
+      next({
+        status: 400,
+        message: "missing required name field",
+      });
+    }
+  } catch (err) {
+    next;
+  }
+};
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
@@ -35,4 +56,5 @@ function validatePost(req, res, next) {
 module.exports = {
   logger,
   validateUserId,
+  validateUser,
 };
