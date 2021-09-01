@@ -21,12 +21,8 @@ router.get("/", logger, async (req, res, next) => {
   }
 });
 
-router.get("/:id", logger, validateUserId, (req, res, next) => {
-  try {
-    res.json(req.user);
-  } catch (err) {
-    next;
-  }
+router.get("/:id", logger, validateUserId, (req, res) => {
+  res.json(req.user);
 });
 
 router.post("/", logger, validateUser, async (req, res, next) => {
@@ -65,8 +61,8 @@ router.delete("/:id", logger, validateUserId, async (req, res, next) => {
 router.get("/:id/posts", logger, validateUserId, async (req, res, next) => {
   try {
     const posts = await Posts.get();
-    const userPosts = posts.filter((userId) => {
-      return userId.user_id === req.user.id;
+    const userPosts = posts.filter((post) => {
+      return post.user_id === req.user.id;
     });
     res.status(200).json(userPosts);
   } catch (err) {
@@ -74,12 +70,26 @@ router.get("/:id/posts", logger, validateUserId, async (req, res, next) => {
   }
 });
 
-router.post("/:id/posts", (req, res) => {
-  // RETURN THE NEWLY CREATED USER POST
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
-});
+router.post(
+  "/:id/posts",
+  logger,
+  validateUserId,
+  validatePost,
+  async (req, res, next) => {
+    try {
+      const postInfo = {
+        ...req.body,
+        user_id: req.user.id,
+      };
+      const newPost = await Posts.insert(postInfo);
+      res.status(200).json(newPost);
+    } catch (err) {
+      next;
+    }
+  }
+);
 
+// eslint-disable-next-line no-unused-vars
 router.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     custom: "Something went wrong in the user router",
@@ -88,5 +98,4 @@ router.use((err, req, res, next) => {
   });
 });
 
-// do not forget to export the router
 module.exports = router;
