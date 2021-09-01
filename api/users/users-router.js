@@ -22,7 +22,7 @@ router.get("/", logger, async (req, res, next) => {
 });
 
 router.get("/:id", logger, validateUserId, (req, res) => {
-  res.json(req.user);
+  res.status(200).json(req.user);
 });
 
 router.post("/", logger, validateUser, async (req, res, next) => {
