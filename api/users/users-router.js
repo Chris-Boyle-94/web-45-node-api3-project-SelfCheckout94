@@ -4,6 +4,7 @@ const {
   logger,
   validateUserId,
   validateUser,
+  validatePost,
 } = require("../middleware/middleware");
 
 const Users = require("./users-model");
@@ -53,8 +54,6 @@ router.put(
 );
 
 router.delete("/:id", logger, validateUserId, async (req, res, next) => {
-  // RETURN THE FRESHLY DELETED USER OBJECT
-  // this needs a middleware to verify user id
   try {
     await Users.remove(req.params.id);
     res.status(200).json(req.user);
@@ -63,9 +62,16 @@ router.delete("/:id", logger, validateUserId, async (req, res, next) => {
   }
 });
 
-router.get("/:id/posts", (req, res) => {
-  // RETURN THE ARRAY OF USER POSTS
-  // this needs a middleware to verify user id
+router.get("/:id/posts", logger, validateUserId, async (req, res, next) => {
+  try {
+    const posts = await Posts.get();
+    const userPosts = posts.filter((userId) => {
+      return userId.user_id === req.user.id;
+    });
+    res.status(200).json(userPosts);
+  } catch (err) {
+    next;
+  }
 });
 
 router.post("/:id/posts", (req, res) => {
